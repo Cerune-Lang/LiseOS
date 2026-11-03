@@ -21,7 +21,7 @@ if [[ "$CURRENT" != "$LIMINE_COMMIT" ]]; then
     echo "Limine revision mismatch. Expected $LIMINE_COMMIT got $CURRENT" >&2
     exit 1
 fi
-for f in limine-bios-cd.bin limine-uefi-cd.bin BOOTX64.EFI; do
+for f in limine-bios-cd.bin limine-uefi-cd.bin limine-bios.sys BOOTX64.EFI; do
     test -f "$LIMINE_DIR/$f" || { echo "missing Limine binary: $f" >&2; exit 1; }
 done
 
@@ -33,7 +33,7 @@ fi
 mkdir -p "$BUILD/iso_root/boot/limine" "$BUILD/iso_root/EFI/BOOT"
 cp "$BUILD/liseos.elf" "$BUILD/iso_root/boot/liseos.elf"
 cp "$ROOT/limine.conf" "$BUILD/iso_root/boot/limine/limine.conf"
-cp "$LIMINE_DIR/limine-bios-cd.bin" "$LIMINE_DIR/limine-uefi-cd.bin" "$BUILD/iso_root/boot/"
+cp "$LIMINE_DIR/limine-bios-cd.bin" "$LIMINE_DIR/limine-uefi-cd.bin" "$LIMINE_DIR/limine-bios.sys" "$BUILD/iso_root/boot/"
 cp "$LIMINE_DIR/BOOTX64.EFI" "$BUILD/iso_root/EFI/BOOT/BOOTX64.EFI"
 
 xorriso -as mkisofs -R -r -J \
