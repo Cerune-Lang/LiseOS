@@ -35,4 +35,8 @@ jobs:
             build/liseos.map
             build/gdb-smoke.log
             build/qemu-smoke.log
+            build/qemu-debug.log
+            build/qemu-debugcon.log
+            build/qemu-monitor-dump.log
+            build/boot-screen.ppm
           if-no-files-found: ignore
