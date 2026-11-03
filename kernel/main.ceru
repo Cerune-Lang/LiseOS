@@ -1,0 +1,12 @@
+// LiseOS M1a: the first Cerune-only kernel entry point.
+//
+// Limine jumps to the ELF entry symbol "main", selected by linker.ld.
+// No C code, host OS runtime, libc, or hand-written assembly is linked.
+//
+// This deliberately does not print, access hardware, or return.
+// Reaching this loop via QEMU/GDB will be the first boot observation.
+// Serial output requires a future Cerune freestanding hardware-I/O interface.
+fn main() -> void {
+    while true {
+    }
+}
