@@ -29,7 +29,8 @@ SECTIONS {
         *(.rodata .rodata.*)
     } :rodata
 
-    .limine_requests ALIGN(8) : {
+    /* Dedicated 4 KiB page: avoid mixing RO and RW PT_LOAD permissions. */
+    .limine_requests ALIGN(0x1000) : {
         /* Limine requests start marker. */
         QUAD(0xf6b8f4b39de7d1ae);
         QUAD(0xfab91a6940fcb9cf);
