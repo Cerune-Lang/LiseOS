@@ -1,58 +1,79 @@
 # LiseOS
 
-**LiseOS** (pronounced *Lee-sa OS*; Japanese: リーサOS) is an experimental operating-system project growing alongside the Cerune ecosystem.
+**LiseOS** (pronounced *Lee-sa OS*) is an experimental operating system whose **kernel implementation is written in [Cerune](https://github.com/Cerune-Lang/Cerune)**.
 
-> **Status: bootstrap / not yet implemented.** The first target is **x86-64 / QEMU**. This does not mean the kernel boots or that OS services already exist.
+> **Status: M1a bootstrap implementation committed; boot not yet verified.** First target: **x86-64/QEMU**. The minimal Cerune entry, ELF build/audit, Limine ISO packaging and QEMU/GDB test scripts exist, but a successful boot has **not** been observed.
 
-[日本語](README.md) · [Architecture decision: ADR-0001](docs/decisions/0001-target-x86-64-qemu.md)
+[日本語](README.md) · [Limine boot notes (Japanese)](docs/boot/limine.md) · [ADR-0001: x86-64/QEMU](docs/decisions/0001-target-x86-64-qemu.md) · [ADR-0002: Cerune-only kernel](docs/decisions/0002-cerune-only-kernel.md)
 
-## First objective
+## Policy
 
-**Boot a LiseOS kernel in QEMU, print an observable serial message, and stop deliberately.**
+- **Use Cerune for kernel/runtime code.** Do not write a throwaway C/assembly kernel first.
+- Treat missing low-level capabilities as explicit Cerune compiler/language tasks.
+- Rust host utilities, an LLVM linker, Limine, QEMU and Python/Bash test tools are permitted, since they do not run as the kernel.
+- Defer Cisa support until the x86-64 kernel foundations are stable.
 
-Proposed initial layout:
+## M1a: Reach the kernel entry
 
 ```text
-QEMU (x86-64)
-  -> Limine bootloader
-     -> freestanding LiseOS kernel
-        -> serial output: "LiseOS: boot ok"
-        -> deliberate halt / QEMU exit
+kernel/main.ceru
+      ↓ Cerune object builder (host-only Rust utility)
+  ELF64 object
+      ↓ ld.lld + linker.ld
+  liseos.elf
+      ↓ Limine + QEMU
+  x86-64 entry: main
+      ↓
+  Cerune infinite loop (no output yet)
 ```
 
-M1 is complete only after **an observed QEMU boot**, not merely compilation. See [ADR-0001](docs/decisions/0001-target-x86-64-qemu.md) for acceptance criteria.
+This first source contains only a loop. `LiseOS: boot ok` on a serial console is the **future M1b objective**, after Cerune gains explicit low-level I/O support. The existing `print` operation relies on host OS facilities and cannot be used directly in a kernel.
 
-## Platform and porting policy
+`linker.ld` currently lays out minimal Limine boot request tags as data. Read [the Limine notes](docs/boot/limine.md) for the role of Limine, the chosen boot protocol and pinned dependency.
 
-| Platform | Role | Status |
-| --- | --- | --- |
-| **x86-64 / QEMU** | Initial primary target via Limine | **Chosen / not yet implemented** |
-| **Cisa** | Potential port only after the kernel foundation is stable | **Future** |
-| **Physical x86-64** | Needs separate hardware and driver validation | **Out of scope for now** |
+## Build and verify (Linux / WSL2)
 
-C and minimal assembly are permitted for bootstrap. **A fully Cerune-written freestanding kernel is not yet proven feasible.** Investigate Cerune's freestanding output, ABI, linking, memory operations and runtime requirements separately before integrating generated kernel code.
+Required: Rust/Cargo, Python 3, `ld.lld`, Git, GNU Make, xorriso, QEMU and GDB.
+
+```sh
+python3 scripts/check-source.py
+cargo test --manifest-path tools/object-builder/Cargo.toml
+bash scripts/build.sh
+bash scripts/iso.sh
+bash scripts/smoke-qemu.sh
+```
+
+- `build.sh` generates a Cerune object and ELF, checking undefined symbols and dynamic loader dependence.
+- `iso.sh` packages an ISO using pinned **Limine v11.4.1**.
+- `smoke-qemu.sh` uses QEMU's GDB stub to observe execution reaching the Cerune `main`.
+- `bash scripts/debug-qemu.sh` opens a manual QEMU/GDB debugging session.
+
+**Build success is not boot success.** M1a requires observable control transfer to the entry point.
 
 ## Milestones
 
-1. **M0 — Direction:** x86-64/QEMU target and boot strategy documented. **Decision accepted**
-2. **M1 — Boot / Hello / Halt:** Reproducible build, Limine boot, serial message, deliberate stop. **Not implemented**
-3. **M2 — Exceptions / Memory:** Observe exceptions, inspect memory map, explore minimal physical page management. **Planned**
-4. **M3 — Interrupts / Tasks:** Add timer interrupts and task execution incrementally. **Planned**
-5. **M4+:** Consider user mode, system calls and other services as justified by tests. Evaluate a Cisa port later.
+| Phase | Goal | Status |
+| --- | --- | --- |
+| M0 | x86-64/QEMU, Limine, Cerune-only kernel decision | **Accepted** |
+| M1a | Cerune → ELF → Limine → QEMU entry observation | **Initial implementation, unverified** |
+| M1b | Serial output and controlled halt via Cerune I/O | **Not implemented** |
+| M2 | Exceptions and physical memory | **Planned** |
+| M3 | Interrupts and tasks | **Planned** |
+| Later | Consider Cisa port | **Deferred** |
 
-## Engineering principles
+## Layout
 
-- Prefer the smallest independently testable increment.
-- Distinguish documented, implemented, booted, and tested.
-- Do not equate QEMU success with real hardware compatibility or security.
-- Record evidence and preserve opportunities for incremental Cerune integration.
+- `kernel/main.ceru` — Cerune kernel entry
+- `tools/object-builder/` — **host-only** Rust wrapper around Cerune native Object API
+- `linker.ld`, `limine.conf` — binary/link layout and boot config
+- `scripts/` — build, ISO, static audit, QEMU/GDB inspection
+- `.github/workflows/bootstrap.yml` — CI smoke tests
+- `docs/boot/limine.md`, `docs/decisions/` — design documentation
 
 ## Related projects
 
-- [Cerune](https://github.com/Cerune-Lang/Cerune) — language, compiler and runtimes
-- [Cisa](https://github.com/Cerune-Lang/Cisa) — experimental virtual CPU written in Cerune (not an initial target)
-- [Sashimi](https://github.com/Cerune-Lang/Sashimi) — Rust x86-64 assembler and object generation library
+[Cerune](https://github.com/Cerune-Lang/Cerune) · [Sashimi](https://github.com/Cerune-Lang/Sashimi) · [Cisa](https://github.com/Cerune-Lang/Cisa) (possible future port).
 
 ## License
 
-Not yet decided. Clarify the license and contribution policy before accepting third-party code contributions.
+Undecided. Define licensing and contribution terms before accepting third-party code.
