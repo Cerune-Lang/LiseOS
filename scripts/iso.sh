@@ -10,7 +10,7 @@ LIMINE_URL="https://github.com/Limine-Bootloader/Limine.git"
 command -v git >/dev/null
 command -v xorriso >/dev/null || { echo 'xorriso is required' >&2; exit 1; }
 
-"$ROOT/scripts/build.sh"
+bash "$ROOT/scripts/build.sh"
 
 if [[ ! -e "$LIMINE_DIR/.git" ]]; then
     mkdir -p "$ROOT/deps"
