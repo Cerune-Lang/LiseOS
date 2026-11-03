@@ -1,0 +1,38 @@
+name: LiseOS Bootstrap
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  x86_64-cerune-limine:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install freestanding toolchain and emulator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lld xorriso qemu-system-x86 gdb
+      - name: Cerune source policy
+        run: python3 scripts/check-source.py
+      - name: Cerune compiler/object-builder test
+        run: cargo test --manifest-path tools/object-builder/Cargo.toml
+      - name: Generate ELF64 and verify no host-runtime imports
+        run: bash scripts/build.sh
+      - name: Build bootable Limine ISO
+        run: bash scripts/iso.sh
+      - name: Observe Cerune entry from QEMU via GDB
+        run: bash scripts/smoke-qemu.sh
+      - name: Attach bootstrap evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-logs
+          path: |
+            build/liseos.map
+            build/gdb-smoke.log
+            build/qemu-smoke.log
+          if-no-files-found: ignore
