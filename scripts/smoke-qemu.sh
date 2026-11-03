@@ -67,13 +67,13 @@ try:
         except TimeoutError:
             pass
         for command in commands:
-            s.sendall((command + "\\n").encode())
+            s.sendall((command + "\n").encode())
             time.sleep(0.25)
             try:
                 result = s.recv(65535).decode("utf-8", "replace")
                 if command != "info registers" or len(result) < 20000:
                     print(result)
-                Path(directory, "qemu-monitor-dump.log").open("a").write(command+"\\n"+result+"\\n")
+                Path(directory, "qemu-monitor-dump.log").open("a").write(command+"\n"+result+"\n")
             except TimeoutError:
                 pass
 except (OSError, TimeoutError) as e:
