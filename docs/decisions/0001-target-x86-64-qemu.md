@@ -2,59 +2,42 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-04
-- **Scope:** LiseOS bootstrap and first hardware target
+- **Scope:** First target and boot path
+- **See also:** [ADR-0002: Cerune-only kernel](0002-cerune-only-kernel.md)
 
 ## Decision
 
-LiseOS will first target **x86-64 under QEMU**.
+LiseOS initially targets **x86-64/QEMU**, using **Limine** as an existing bootloader. Build the **kernel itself in Cerune**, rather than using a C/assembly bootstrap kernel.
 
-Use an established bootloader, initially **Limine**, to enter 64-bit kernel code. Focus on a reproducible **boot -> serial output -> controlled stop** path before implementing memory allocation, exceptions, interrupts, or scheduling.
+The first observable milestone is **M1a**, transferring execution to Cerune-generated `main` (infinite loop, no I/O yet). **M1b** will add controlled serial output and halt only once the required hardware interfaces exist in Cerune.
 
-**Cisa is a possible future port, not an initial platform.** Its current instruction set and machine model should not be forced to grow just to satisfy early kernel bring-up.
+Cisa is a future port, not an initial target.
 
 ## Why
 
-1. QEMU provides a mature, reproducible x86-64 execution environment with widely documented debugging facilities.
-2. Separating emulator/virtual CPU development from kernel development makes failures easier to attribute.
-3. A bootloader reduces unrelated early work on firmware, disk layout, and mode switching.
-4. Once kernel interfaces and invariants are tested on a stable target, the cost and requirements of porting to Cisa will be much clearer.
+1. QEMU isolates kernel development from designing another virtual CPU at the same time.
+2. Limine handles firmware- and disk-boot concerns, allowing LiseOS to concentrate on the kernel.
+3. Writing kernel code in Cerune from the start drives the language's freestanding capabilities.
+4. Existing host tools (Rust compiler process, linker, image builder, debugger) are not part of the kernel and remain available.
 
-## Initial implementation boundary
+## Initial constraints
 
-- **Boot environment:** Limine protocol, x86-64 ELF kernel, QEMU. Choose a pinned protocol and bootloader version when adding the build.
-- **Bootstrap language:** C and minimal assembly are allowed for early freestanding bring-up. Do not claim Cerune can build a freestanding kernel until independently verified.
-- **Cerune integration:** Investigate object output, SysV calling convention, linker compatibility, runtime dependencies, intrinsics and memory access in isolated experiments. Migrate subsystems only when tests prove viability.
-- **Cisa:** Treat as a later portability project. Any future port will require a separate platform capability assessment (interrupts, memory, privilege, I/O, executable format).
-- **Safety:** Emulator boot does not imply real hardware support.
+- **Kernel source:** Cerune only.
+- **Host build tools:** Rust/Cargo for the Cerune API, `ld.lld`, Python/Bash, Limine, QEMU, GDB.
+- **Boot format:** x86-64 ELF64 high-half executable.
+- **Protocol:** Limine, minimal request markers/base revision, version pinned in [boot docs](../boot/limine.md).
+- **Evidence:** Link and ELF audits are not enough. QEMU with GDB must observe reaching `main`.
+- **Not yet demonstrated:** freestanding kernel boot, serial I/O, interrupts, memory management, hardware compatibility.
 
-## First executable milestone: M1
+## Roadmap
 
-**Boot / Hello / Halt** must be observable, not merely buildable.
-
-Acceptance criteria:
-
-1. A documented command builds a freestanding x86-64 ELF kernel and a bootable medium.
-2. A documented QEMU invocation starts it via Limine.
-3. QEMU serial output includes an unambiguous line such as `LiseOS: boot ok`.
-4. A deliberate halt/exit path is observable; a crash, triple fault, or timeout must not count as success.
-5. A clean environment can reproduce the steps; record compiler/bootloader/QEMU versions.
-
-Prefer headless execution for smoke tests (`-display none -serial stdio` where appropriate); avoid conflating debug-output-only or compile-only checks with a real boot test.
-
-## Subsequent milestones
-
-- **M2:** exception handling and memory-map inspection, then physical page allocation.
-- **M3:** timer/interrupt setup and basic cooperative/preemptive task experiments.
-- **M4:** system-call/user-mode boundary only after the above are tested.
-- **Later:** evaluate Cisa backend/guest port and additional architectures.
+- **M0:** Architectural decision accepted.
+- **M1a:** Cerune object, high-half ELF, Limine ISO, QEMU entry observation (implementation committed; not yet observed).
+- **M1b:** Cerune hardware I/O + serial output + deliberate stop.
+- **M2:** Exception and memory handling.
+- **M3:** Interrupts and tasks.
+- **Later:** Evaluate Cisa migration with a documented feature-gap analysis.
 
 ## Revisit when
 
-- Cerune gains experimentally verified freestanding and kernel-friendly codegen.
-- QEMU bring-up reveals assumptions that should change the boot approach.
-- Cisa acquires a sufficiently complete and tested platform specification for an OS port.
-
-## Reference
-
-- [Limine C template (x86-64)](https://github.com/Limine-Bootloader/limine-c-template-x86-64)
-- [Limine Bare Bones (OSDev Wiki)](https://wiki.osdev.org/Limine_Bare_Bones)
+A reproducible test invalidates an assumption in the initial Limine or Cerune object flow, or Cerune gains a first-class freestanding target and boot-protocol data layout support.
