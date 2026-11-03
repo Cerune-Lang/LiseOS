@@ -1,0 +1,10 @@
+[package]
+name = "liseos-object-builder"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+# Host-only build utility: this Rust code never becomes part of the kernel.
+# Pin the Cerune compiler library to an exact revision.
+[dependencies]
+cerune-lang = { git = "https://github.com/Cerune-Lang/Cerune.git", rev = "ba4788fd7e15c4623621e4e6f96b8c3cc49f6670" }
