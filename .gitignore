@@ -1,0 +1,7 @@
+/build/
+/deps/
+/target/
+/tools/object-builder/target/
+*.iso
+*.o
+*.elf
