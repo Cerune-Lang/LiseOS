@@ -6,6 +6,7 @@ LiseOS (pronounced *Lee-sa OS*) is an experimental operating system with a kerne
 
 A minimal Cerune kernel and build/boot test tools are available. Serial output and memory management are not implemented yet.
 
+[![CI](https://github.com/Cerune-Lang/LiseOS/actions/workflows/bootstrap.yml/badge.svg)](https://github.com/Cerune-Lang/LiseOS/actions/workflows/bootstrap.yml)
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](#license)
 
 ## Build and run
@@ -28,6 +29,28 @@ Check results in [GitHub Actions](https://github.com/Cerune-Lang/LiseOS/actions)
 - [kernel/main.ceru](kernel/main.ceru) — kernel source
 - [Implementation notes](docs/design/implementation.md) — tools and files (Japanese)
 - [Limine bootloader](docs/boot/limine.md) — boot process (Japanese)
+
+## Repository layout
+
+| Path | Purpose |
+| --- | --- |
+| `kernel/` | Kernel implementation written in Cerune |
+| `tools/object-builder/` | Host-side Rust tool to generate ELF objects from Cerune |
+| `scripts/` | Build, ELF audit, ISO packaging, and QEMU smoke checks |
+| `docs/` | Implementation design and Limine boot notes |
+| `licenses/limine/` | Bundled Limine license and third-party notices |
+
+## Development checks
+
+```sh
+python3 scripts/check-source.py
+cargo test --manifest-path tools/object-builder/Cargo.toml
+bash scripts/build.sh
+bash scripts/iso.sh
+bash scripts/smoke-qemu.sh
+```
+
+The [CI workflow](.github/workflows/bootstrap.yml) runs these checks too. The boot smoke check only verifies that QEMU reaches the Cerune `main` entry point; it does not establish that display output, memory management, or other OS functionality works.
 
 ## Related repositories
 

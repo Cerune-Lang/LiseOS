@@ -6,6 +6,7 @@ LiseOS（リーサOS）は、[Cerune](https://github.com/Cerune-Lang/Cerune)で�
 
 現在はCerune製の最小カーネルとビルド・起動検査用のツールを実装しています。シリアル出力やメモリ管理は未実装です。
 
+[![CI](https://github.com/Cerune-Lang/LiseOS/actions/workflows/bootstrap.yml/badge.svg)](https://github.com/Cerune-Lang/LiseOS/actions/workflows/bootstrap.yml)
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](#ライセンス)
 
 ## ビルドと実行
@@ -28,6 +29,28 @@ bash scripts/smoke-qemu.sh
 - [kernel/main.ceru](kernel/main.ceru) — カーネル本体
 - [実装の説明](docs/design/implementation.md) — 使用するツールと各ファイルの役割
 - [Limineについて](docs/boot/limine.md) — ブートローダーと起動方法
+
+## リポジトリ構成
+
+| パス | 役割 |
+| --- | --- |
+| `kernel/` | Ceruneで記述したカーネル本体 |
+| `tools/object-builder/` | CeruneからELFオブジェクトを生成するホスト側Rustツール |
+| `scripts/` | ビルド、ELF検査、ISO生成、QEMU起動検査 |
+| `docs/` | 実装方針とLimineの起動仕様 |
+| `licenses/limine/` | 同梱するLimineのライセンス・第三者ソフトウェア表示 |
+
+## 開発時の確認
+
+```sh
+python3 scripts/check-source.py
+cargo test --manifest-path tools/object-builder/Cargo.toml
+bash scripts/build.sh
+bash scripts/iso.sh
+bash scripts/smoke-qemu.sh
+```
+
+これらの確認は[CI](.github/workflows/bootstrap.yml)でも実行しています。起動検査で確認するのは、QEMU上のカーネルがCerune製`main`に到達することまでです。画面表示やメモリ管理などの実装完了は意味しません。
 
 ## 関連リポジトリ
 
