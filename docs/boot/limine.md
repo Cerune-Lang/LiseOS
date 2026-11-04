@@ -37,3 +37,11 @@ gdb -q build/liseos.elf -ex 'target remote :1234' -ex 'hbreak main' -ex 'continu
 Limineはカーネルに配置したリクエストデータを読み取り、要求された起動情報を渡します。現状の`linker.ld`は開始・終了マーカーとbase revision 3のみを記録しています。メモリマップなどの情報はまだ要求していません。
 
 仕様: [Limine Boot Protocol](https://github.com/Limine-Bootloader/limine-protocol)
+
+## ライセンスと再配布
+
+LiseOS本体のライセンスはリポジトリの[`LICENSE-MIT`](../../LICENSE-MIT)と[`LICENSE-APACHE`](../../LICENSE-APACHE)を参照してください。Limineのライセンスは別管理です。
+
+LiseOSはLimine v11.4.1の固定バイナリ版をISOに組み込むため、同バージョンの[Limineのライセンス](../../licenses/limine/LICENSE)と[第三者ソフトウェアの表示](../../licenses/limine/3RDPARTY.md)を保存しています。`scripts/iso.sh`はこれらを生成ISOの`licenses/limine/`へ、LiseOSのライセンスを`licenses/liseos/`へコピーします。
+
+Limineのバイナリや依存コンポーネントにLiseOSの`MIT OR Apache-2.0`が適用されるわけではありません。

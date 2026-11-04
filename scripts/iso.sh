@@ -30,11 +30,18 @@ if [[ ! -x "$LIMINE_DIR/limine" ]]; then
     command -v make >/dev/null
     make -C "$LIMINE_DIR"
 fi
-mkdir -p "$BUILD/iso_root/boot/limine" "$BUILD/iso_root/EFI/BOOT"
+mkdir -p "$BUILD/iso_root/boot/limine" "$BUILD/iso_root/EFI/BOOT" \
+    "$BUILD/iso_root/licenses/liseos" "$BUILD/iso_root/licenses/limine/LICENSES"
 cp "$BUILD/liseos.elf" "$BUILD/iso_root/boot/liseos.elf"
 cp "$ROOT/limine.conf" "$BUILD/iso_root/boot/limine/limine.conf"
 cp "$LIMINE_DIR/limine-bios-cd.bin" "$LIMINE_DIR/limine-uefi-cd.bin" "$LIMINE_DIR/limine-bios.sys" "$BUILD/iso_root/boot/"
 cp "$LIMINE_DIR/BOOTX64.EFI" "$BUILD/iso_root/EFI/BOOT/BOOTX64.EFI"
+
+# Keep license and third-party notices alongside redistributable boot binaries.
+cp "$ROOT/LICENSE-MIT" "$ROOT/LICENSE-APACHE" "$BUILD/iso_root/licenses/liseos/"
+cp "$ROOT/licenses/limine/LICENSE" "$ROOT/licenses/limine/3RDPARTY.md" "$BUILD/iso_root/licenses/limine/"
+cp "$ROOT/licenses/limine/LICENSES/LicenseRef-scancode-bsd-no-disclaimer-unmodified.txt" \
+    "$BUILD/iso_root/licenses/limine/LICENSES/"
 
 xorriso -as mkisofs -R -r -J \
     -b boot/limine-bios-cd.bin -no-emul-boot -boot-load-size 4 -boot-info-table \

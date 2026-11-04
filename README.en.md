@@ -6,6 +6,8 @@ LiseOS (pronounced *Lee-sa OS*) is an experimental operating system with a kerne
 
 A minimal Cerune kernel and build/boot test tools are available. Serial output and memory management are not implemented yet.
 
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](#license)
+
 ## Build and run
 
 On Linux or WSL2, install Rust, Python 3, LLVM lld, Git, Make, xorriso, QEMU, and GDB.
@@ -30,3 +32,12 @@ Check results in [GitHub Actions](https://github.com/Cerune-Lang/LiseOS/actions)
 ## Related repositories
 
 [Cerune](https://github.com/Cerune-Lang/Cerune) · [Sashimi](https://github.com/Cerune-Lang/Sashimi) · [Cisa](https://github.com/Cerune-Lang/Cisa)
+
+## License
+
+LiseOS is dual-licensed under either of:
+
+- [MIT License](LICENSE-MIT)
+- [Apache License 2.0](LICENSE-APACHE)
+
+at your option.

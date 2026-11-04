@@ -6,6 +6,8 @@ LiseOS（リーサOS）は、[Cerune](https://github.com/Cerune-Lang/Cerune)で�
 
 現在はCerune製の最小カーネルとビルド・起動検査用のツールを実装しています。シリアル出力やメモリ管理は未実装です。
 
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](#ライセンス)
+
 ## ビルドと実行
 
 Linux / WSL2でRust、Python 3、LLVM lld、Git、Make、xorriso、QEMU、GDBを用意してください。
@@ -30,3 +32,10 @@ bash scripts/smoke-qemu.sh
 ## 関連リポジトリ
 
 [Cerune](https://github.com/Cerune-Lang/Cerune) · [Sashimi](https://github.com/Cerune-Lang/Sashimi) · [Cisa](https://github.com/Cerune-Lang/Cisa)
+
+## ライセンス
+
+LiseOSは、以下のいずれかのライセンスを選択して利用できます。
+
+- [MIT License](LICENSE-MIT)
+- [Apache License 2.0](LICENSE-APACHE)
